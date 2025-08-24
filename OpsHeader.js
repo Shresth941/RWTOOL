@@ -1,34 +1,45 @@
-// src/components/Ops/OpsHeader.js
-import React from 'react';
-import { FiSearch, FiBell, FiUser, FiDownload, FiUpload } from 'react-icons/fi';
-import styles from './OpsHeader.module.css';
+// src/components/Ops/OpsSidebar.js
+import React, { useState } from 'react';
+import styles from './OpsSidebar.module.css';
 
-const OpsHeader = ({ onDownloadsClick, onFavoritesClick, onSearchChange }) => {
+const OpsSidebar = ({ onCategorySelect }) => {
+    const [activeLink, setActiveLink] = useState('All'); 
+
+    const handleLinkClick = (category) => {
+        setActiveLink(category);
+        onCategorySelect(category);
+    };
+
     return (
-        <header className={styles.header}>
-            <div className={styles.topRow}>
-                <div className={styles.tabs}>
-                    <button onClick={onDownloadsClick}>Downloads</button>
-                    <button onClick={onFavoritesClick} className={styles.active}>Favorites</button>
-                </div>
-                <div className={styles.actions}>
-                    <button className={styles.iconButton}><FiBell /></button>
-                    <button className={styles.iconButton}><FiUser /></button>
-                    <button className="btn btn-sm btn-outline-secondary logoutButton">Logout</button>
-                </div>
+        <nav className={styles.sidebar}>
+            <div className={styles.navGroup}>
+                <h3 className={styles.groupTitle}>SCB</h3>
+                <a href="#" 
+                   className={`${styles.navLink} ${activeLink === 'All' ? styles.active : ''}`}
+                   onClick={() => handleLinkClick('All')}>
+                   All Reports
+                </a>
+                <a href="#" 
+                   className={`${styles.navLink} ${activeLink === 'General' ? styles.active : ''}`}
+                   onClick={() => handleLinkClick('General')}>
+                   General
+                </a>
+                <a href="#" 
+                   className={`${styles.navLink} ${activeLink === 'Reports' ? styles.active : ''}`}
+                   onClick={() => handleLinkClick('Reports')}>
+                   Reports
+                </a>
             </div>
-            <div className={styles.bottomRow}>
-                <div className={styles.searchBar}>
-                    <FiSearch />
-                    <input type="text" placeholder="Search" onChange={onSearchChange} />
-                </div>
-                <div className={styles.toolbar}>
-                    <button className={styles.iconButton}><FiUpload /></button>
-                    <button className={styles.iconButton}><FiDownload /></button>
-                </div>
+            <div className={styles.navGroup}>
+                <h3 className={styles.groupTitle}>Credit</h3>
+                <a href="#" 
+                   className={`${styles.navLink} ${activeLink === 'Credit Risk' ? styles.active : ''}`}
+                   onClick={() => handleLinkClick('Credit Risk')}>
+                   Credit Risk
+                </a>
             </div>
-        </header>
+        </nav>
     );
 };
 
-export default OpsHeader;
+export default OpsSidebar;
