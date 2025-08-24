@@ -73,6 +73,12 @@
     background-color: #f8f9fa;
 }
 
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 .toolbar {
     display: flex;
     gap: 1rem;
