@@ -1,33 +1,65 @@
 // src/pages/OpsDashboardPage.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import OpsSidebar from '../components/Ops/OpsSidebar';
 import OpsHeader from '../components/Ops/OpsHeader';
 import ActionModal from '../components/Ops/ActionModal';
 import { initialOpsReports } from '../data/mockData';
-import { FiFolder, FiDownload, FiStar, FiCheckSquare, FiSquare } from 'react-icons/fi';
+import { FiFolder, FiDownload, FiStar } from 'react-icons/fi';
 import styles from './OpsDashboardPage.module.css';
 
 const OpsDashboardPage = () => {
     const [reports, setReports] = useState([]);
-    const [filteredReports, setFilteredReports] = useState([]);
     const [showModal, setShowModal] = useState(null);
     const [selectedReports, setSelectedReports] = useState([]);
+    
+    // State for filters
+    const [searchTerm, setSearchTerm] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('All');
+    const [dateFilter, setDateFilter] = useState('All');
+    const [typeFilter, setTypeFilter] = useState('All');
 
     useEffect(() => {
         setReports(initialOpsReports);
-        setFilteredReports(initialOpsReports);
     }, []);
 
     const favorites = reports.filter(r => r.isFavorite);
 
-    const handleSearchChange = (event) => {
-        const searchTerm = event.target.value.toLowerCase();
-        const filtered = reports.filter(report =>
-            report.title.toLowerCase().includes(searchTerm)
-        );
-        setFilteredReports(filtered);
-        setSelectedReports([]); // Clear selection on search
-    };
+    // Memoized filtering logic for performance
+    const filteredReports = useMemo(() => {
+        return reports.filter(report => {
+            // Search filter
+            if (searchTerm && !report.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+                return false;
+            }
+            // Category filter (from sidebar)
+            if (categoryFilter !== 'All' && report.category !== categoryFilter) {
+                return false;
+            }
+            // File type filter
+            if (typeFilter !== 'All' && report.type !== typeFilter) {
+                return false;
+            }
+            // Date filter
+            if (dateFilter !== 'All') {
+                const reportDate = new Date(report.date);
+                const now = new Date();
+                if (dateFilter === 'today') {
+                    if (reportDate.toDateString() !== now.toDateString()) return false;
+                }
+                if (dateFilter === 'week') {
+                    const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
+                    if (reportDate < oneWeekAgo) return false;
+                }
+                if (dateFilter === 'month') {
+                    if (reportDate.getMonth() !== now.getMonth() || reportDate.getFullYear() !== now.getFullYear()) return false;
+                }
+                if (dateFilter === 'year') {
+                    if (reportDate.getFullYear() !== now.getFullYear()) return false;
+                }
+            }
+            return true;
+        });
+    }, [reports, searchTerm, categoryFilter, dateFilter, typeFilter]);
 
     const handleSelectAll = (e) => {
         if (e.target.checked) {
@@ -55,9 +87,14 @@ const OpsDashboardPage = () => {
         setSelectedReports([]);
     };
 
-    const handleDownloadSelected = () => {
-        alert(`Downloading ${selectedReports.length} report(s)...`);
+    const handleDownload = (reportIds) => {
+        const reportsToDownload = reports.filter(r => reportIds.includes(r.id));
+        alert(`Downloading ${reportsToDownload.length} report(s):\n${reportsToDownload.map(r => r.title).join('\n')}`);
         setSelectedReports([]);
+    };
+    
+    const handleDateFilterClick = (filter) => {
+        setDateFilter(prev => prev === filter ? 'All' : filter);
     };
 
     const groupedReports = filteredReports.reduce((acc, report) => {
@@ -67,19 +104,22 @@ const OpsDashboardPage = () => {
 
     return (
         <div className={styles.dashboard}>
-            <OpsSidebar />
+            <OpsSidebar onCategorySelect={setCategoryFilter} />
             <div className={styles.mainContent}>
                 <OpsHeader 
-                    onDownloadsClick={() => setShowModal('downloads')}
+                    onDownloadsClick={() => handleDownload(selectedReports)}
                     onFavoritesClick={() => setShowModal('favorites')}
-                    onSearchChange={handleSearchChange}
+                    onSearchChange={(e) => setSearchTerm(e.target.value)}
+                    onDateFilter={handleDateFilterClick}
+                    onTypeFilter={(e) => setTypeFilter(e.target.value)}
+                    activeDateFilter={dateFilter}
                 />
                 <main className={styles.contentArea}>
                     {Object.entries(groupedReports).map(([category, reportsInCategory]) => (
                         <section key={category}>
                             <div className={styles.folderHeader}>
                                 <FiFolder />
-                                <h2>{category}</h2>
+                                <h2>{category} ({reportsInCategory.length})</h2>
                             </div>
                             <table className={styles.table}>
                                 <thead>
@@ -115,7 +155,12 @@ const OpsDashboardPage = () => {
                                             </td>
                                             <td>{report.type}</td>
                                             <td>{report.date}</td>
-                                            <td><FiDownload className={styles.downloadIcon} /></td>
+                                            <td>
+                                                <FiDownload 
+                                                    className={styles.downloadIcon} 
+                                                    onClick={() => handleDownload([report.id])}
+                                                />
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -127,19 +172,11 @@ const OpsDashboardPage = () => {
                 {selectedReports.length > 0 && (
                     <div className={styles.selectionToolbar}>
                         <p>{selectedReports.length} item(s) selected</p>
-                        <button onClick={handleDownloadSelected}><FiDownload /> Download Selected</button>
+                        <button onClick={() => handleDownload(selectedReports)}><FiDownload /> Download Selected</button>
                         <button onClick={handleAddToFavorites}><FiStar /> Add to Favorites</button>
                     </div>
                 )}
             </div>
-
-            <ActionModal 
-                show={showModal === 'downloads'} 
-                onClose={() => setShowModal(null)}
-                title="Download Confirmation"
-            >
-                <p>The download action is performed on selected files using the toolbar that appears at the bottom of the screen.</p>
-            </ActionModal>
 
             <ActionModal 
                 show={showModal === 'favorites'} 
