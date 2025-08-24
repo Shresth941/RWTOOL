@@ -12,6 +12,9 @@ const OpsDashboardPage = () => {
     const [showModal, setShowModal] = useState(null);
     const [selectedReports, setSelectedReports] = useState([]);
     
+    // NEW: State to track downloaded files
+    const [downloadHistory, setDownloadHistory] = useState([]);
+    
     // State for filters
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
@@ -27,35 +30,19 @@ const OpsDashboardPage = () => {
     // Memoized filtering logic for performance
     const filteredReports = useMemo(() => {
         return reports.filter(report => {
-            // Search filter
-            if (searchTerm && !report.title.toLowerCase().includes(searchTerm.toLowerCase())) {
-                return false;
-            }
-            // Category filter (from sidebar)
-            if (categoryFilter !== 'All' && report.category !== categoryFilter) {
-                return false;
-            }
-            // File type filter
-            if (typeFilter !== 'All' && report.type !== typeFilter) {
-                return false;
-            }
-            // Date filter
+            if (searchTerm && !report.title.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+            if (categoryFilter !== 'All' && report.category !== categoryFilter) return false;
+            if (typeFilter !== 'All' && report.type !== typeFilter) return false;
             if (dateFilter !== 'All') {
                 const reportDate = new Date(report.date);
                 const now = new Date();
-                if (dateFilter === 'today') {
-                    if (reportDate.toDateString() !== now.toDateString()) return false;
-                }
+                if (dateFilter === 'today' && reportDate.toDateString() !== now.toDateString()) return false;
                 if (dateFilter === 'week') {
-                    const oneWeekAgo = new Date(now.setDate(now.getDate() - 7));
+                    const oneWeekAgo = new Date(new Date().setDate(now.getDate() - 7));
                     if (reportDate < oneWeekAgo) return false;
                 }
-                if (dateFilter === 'month') {
-                    if (reportDate.getMonth() !== now.getMonth() || reportDate.getFullYear() !== now.getFullYear()) return false;
-                }
-                if (dateFilter === 'year') {
-                    if (reportDate.getFullYear() !== now.getFullYear()) return false;
-                }
+                if (dateFilter === 'month' && (reportDate.getMonth() !== now.getMonth() || reportDate.getFullYear() !== now.getFullYear())) return false;
+                if (dateFilter === 'year' && reportDate.getFullYear() !== now.getFullYear()) return false;
             }
             return true;
         });
@@ -87,10 +74,20 @@ const OpsDashboardPage = () => {
         setSelectedReports([]);
     };
 
+    // UPDATED: This function now updates the download history
     const handleDownload = (reportIds) => {
         const reportsToDownload = reports.filter(r => reportIds.includes(r.id));
+        if (reportsToDownload.length === 0) {
+            setShowModal('downloads'); // Open the modal even if no files are selected
+            return;
+        }
+
+        // Add newly downloaded files to the top of the history
+        setDownloadHistory(prevHistory => [...reportsToDownload, ...prevHistory]);
+        
         alert(`Downloading ${reportsToDownload.length} report(s):\n${reportsToDownload.map(r => r.title).join('\n')}`);
         setSelectedReports([]);
+        setShowModal('downloads'); // Show the modal with the updated list
     };
     
     const handleDateFilterClick = (filter) => {
@@ -107,7 +104,7 @@ const OpsDashboardPage = () => {
             <OpsSidebar onCategorySelect={setCategoryFilter} />
             <div className={styles.mainContent}>
                 <OpsHeader 
-                    onDownloadsClick={() => handleDownload(selectedReports)}
+                    onDownloadsClick={() => setShowModal('downloads')}
                     onFavoritesClick={() => setShowModal('favorites')}
                     onSearchChange={(e) => setSearchTerm(e.target.value)}
                     onDateFilter={handleDateFilterClick}
@@ -115,6 +112,7 @@ const OpsDashboardPage = () => {
                     activeDateFilter={dateFilter}
                 />
                 <main className={styles.contentArea}>
+                    {/* Table rendering logic remains the same */}
                     {Object.entries(groupedReports).map(([category, reportsInCategory]) => (
                         <section key={category}>
                             <div className={styles.folderHeader}>
@@ -177,6 +175,22 @@ const OpsDashboardPage = () => {
                     </div>
                 )}
             </div>
+
+            {/* UPDATED: This modal now displays the download history */}
+            <ActionModal 
+                show={showModal === 'downloads'} 
+                onClose={() => setShowModal(null)}
+                title="Download History"
+            >
+                {downloadHistory.length > 0 ? (
+                    <ul className={styles.modalContentList}>
+                        {/* Shows up to the 10 most recent downloads */}
+                        {downloadHistory.slice(0, 10).map((item, index) => <li key={`${item.id}-${index}`}>{item.title}</li>)}
+                    </ul>
+                ) : (
+                    <p>You haven't downloaded any files yet.</p>
+                )}
+            </ActionModal>
 
             <ActionModal 
                 show={showModal === 'favorites'} 
