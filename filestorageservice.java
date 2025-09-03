@@ -1,10 +1,13 @@
-import com.wealthcore.entity.ReportType;
+package RwTool.rwtool.services;
+
+import RwTool.rwtool.entity.ReportType;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,12 +18,10 @@ public class FileStorageService {
 
     private final Path rootLocation;
 
-    // Inject the upload directory from application.properties
     public FileStorageService(@Value("${file.upload-dir}") String uploadDir) {
         this.rootLocation = Paths.get(uploadDir);
     }
 
-    // This method runs once after the service is created to ensure the root directory exists.
     @PostConstruct
     public void init() {
         try {
@@ -30,34 +31,20 @@ public class FileStorageService {
         }
     }
 
-    /**
-     * Stores a file in a dynamic sub-directory based on the report type.
-     *
-     * @param file       The file to store.
-     * @param reportType The type of report, used to determine the sub-directory.
-     * @return The full path where the file was stored.
-     */
     public String store(MultipartFile file, ReportType reportType) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Failed to store empty file.");
+        }
         try {
-            if (file.isEmpty()) {
-                throw new IllegalArgumentException("Failed to store empty file.");
-            }
-
-            // Step I: Construct the dynamic storage path (e.g., ./local-file-storage/KYC Reports)
             Path targetDirectory = this.rootLocation.resolve(reportType.getName());
-
-            // Step J: Create the directory if it doesn't exist
             Files.createDirectories(targetDirectory);
-
-            // Step K: Generate a unique file name to prevent overwrites and for security
             String uniqueFileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path destinationFile = targetDirectory.resolve(uniqueFileName).normalize().toAbsolutePath();
+            Path destinationFile = targetDirectory.resolve(Paths.get(uniqueFileName)).normalize().toAbsolutePath();
 
-            // Step L: Save the file
-            Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
-
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+            }
             return destinationFile.toString();
-
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file.", e);
         }
