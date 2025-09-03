@@ -1,8 +1,8 @@
-package com.wealthcore.controller;
+package RwTool.rwtool.controller;
 
-import com.wealthcore.dto.ReportDto;
-import com.wealthcore.entity.Report;
-import com.wealthcore.service.AdminService;
+import RwTool.rwtool.dto.ReportDto;
+import RwTool.rwtool.entity.Report;
+import RwTool.rwtool.services.AdminService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,37 +21,24 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    // ... your other methods (user management, report type creation) ...
-
-    /**
-     * Endpoint for an admin to manually upload a report.
-     */
     @PostMapping("/reports/upload")
-    public ResponseEntity<ReportDto> handleManualUpload(
+    public ResponseEntity<ReportDto> handleIntelligentUpload(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("reportTypeId") UUID reportTypeId,
-            Authentication authentication) { // Spring Security provides the logged-in user
-
-        // Assuming the user's ID (UUID) is stored as the principal's name in the JWT
+            Authentication authentication) {
+        
         UUID uploaderId = UUID.fromString(authentication.getName());
+        
+        Report savedReport = adminService.intelligentUpload(file, uploaderId);
 
-        // Step B: Call the service layer to handle the logic
-        Report savedReport = adminService.manualUpload(file, reportTypeId, uploaderId);
-
-        // Convert the saved Report entity to a DTO for the response
-        ReportDto responseDto = convertToDto(savedReport); // You need to implement this conversion method
-
-        // Step S: Return 201 Created with the details of the new report
+        ReportDto responseDto = convertToDto(savedReport);
+        
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
-    // Helper method to convert Entity to DTO
     private ReportDto convertToDto(Report report) {
+        // Create and return a DTO from the Report entity
         ReportDto dto = new ReportDto();
-        dto.setReportId(report.getReportId());
-        dto.setFileName(report.getFileName());
-        dto.setGeneratedDate(report.getGeneratedDate());
-        dto.setReportTypeName(report.getReportType().getName());
+        // Set fields...
         return dto;
     }
 }
