@@ -1,0 +1,58 @@
+package RwTool.rwtool.services;
+
+import RwTool.rwtool.entity.*;
+import RwTool.rwtool.repo.*;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+public class AdminFileService {
+    private final ReportRepository reportRepository;
+    private final ReportTypeRepository reportTypeRepository;
+    private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
+
+    public AdminFileService(ReportRepository r, ReportTypeRepository rt, UserRepository u, FileStorageService fs) {
+        this.reportRepository = r;
+        this.reportTypeRepository = rt;
+        this.userRepository = u;
+        this.fileStorageService = fs;
+    }
+
+    @Transactional
+    public Report intelligentUpload(MultipartFile file, Long uploaderId) {
+        UserEntity uploader = userRepository.findById(uploaderId).orElseThrow(() -> new EntityNotFoundException("Admin uploader not found"));
+        ReportType reportType = findOrCreateReportType(file.getOriginalFilename());
+        String storedFilePath = fileStorageService.store(file, reportType);
+
+        Report newReport = new Report();
+        newReport.setFileName(file.getOriginalFilename());
+        newReport.setReportType(reportType);
+        newReport.setUploadedBy(uploader.getFullname());
+        newReport.setFileStoragePath(storedFilePath);
+        newReport.setGeneratedDate(LocalDateTime.now());
+        
+        return reportRepository.save(newReport);
+    }
+
+    private ReportType findOrCreateReportType(String fileName) {
+        String parsedName = parseNameFromFileName(fileName);
+        Optional<ReportType> existingType = reportTypeRepository.findByName(parsedName);
+        return existingType.orElseGet(() -> {
+            ReportType newType = new ReportType();
+            newType.setName(parsedName);
+            return reportTypeRepository.save(newType);
+        });
+    }
+
+    private String parseNameFromFileName(String fileName) {
+        String baseName = fileName;
+        if (fileName.contains("_")) baseName = fileName.substring(0, fileName.indexOf("_"));
+        else if (fileName.contains(".")) baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+        return baseName.replaceAll("[^a-zA-Z0-9\\s]", "").trim() + " Reports";
+    }
+}
