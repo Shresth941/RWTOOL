@@ -1,13 +1,15 @@
 package RwTool.rwtool.dto;
 
+import lombok.Getter;
 import java.time.LocalDateTime;
 
+@Getter
 public class ReportResponse {
-    private Long reportId;
-    private String fileName;
-    private String fileStoragePath;
-    private LocalDateTime generatedDate;
-    private String uploadedBy;
+    private final Long reportId;
+    private final String fileName;
+    private final String fileStoragePath;
+    private final LocalDateTime generatedDate;
+    private final String uploadedBy;
 
     public ReportResponse(Long reportId, String fileName, String fileStoragePath, LocalDateTime generatedDate, String uploadedBy) {
         this.reportId = reportId;
@@ -16,6 +18,4 @@ public class ReportResponse {
         this.generatedDate = generatedDate;
         this.uploadedBy = uploadedBy;
     }
-
-  
 }
