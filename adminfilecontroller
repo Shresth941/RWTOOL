@@ -12,19 +12,36 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/admin/files")
 public class AdminFileController {
+
     private final AdminFileService adminFileService;
-    public AdminFileController(AdminFileService s) { this.adminFileService = s; }
+
+    public AdminFileController(AdminFileService adminFileService) {
+        this.adminFileService = adminFileService;
+    }
 
     @PostMapping("/upload")
     public ResponseEntity<ReportResponse> handleIntelligentUpload(
-            @RequestParam("file") MultipartFile file, Authentication authentication) {
+            @RequestParam("file") MultipartFile file,
+            Authentication authentication) {
+        
+        // In a real security setup, the user's ID would be reliably obtained from the token/session
         Long uploaderId = Long.parseLong(authentication.getName());
+        
         Report savedReport = adminFileService.intelligentUpload(file, uploaderId);
+
         ReportResponse responseDto = convertToDto(savedReport);
+        
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
     private ReportResponse convertToDto(Report report) {
-        return new ReportResponse(report.getReportId(), report.getFileName(), report.getFileStoragePath(), report.getGeneratedDate(), report.getUploadedBy());
+        // This constructor matches the ReportResponse DTO your team created
+        return new ReportResponse(
+            report.getReportId(),
+            report.getFileName(),
+            report.getFileStoragePath(),
+            report.getGeneratedDate(),
+            report.getUploadedBy()
+        );
     }
 }
