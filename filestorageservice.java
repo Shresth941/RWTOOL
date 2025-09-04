@@ -3,14 +3,22 @@ package RwTool.rwtool.services;
 import RwTool.rwtool.entity.ReportType;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.*;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class FileStorageService {
+
     private final Path rootLocation;
 
     public FileStorageService(@Value("${file.upload-dir}") String uploadDir) {
@@ -26,22 +34,48 @@ public class FileStorageService {
         }
     }
 
+    /**
+     * Stores a file in a subdirectory named after the report type.
+     * @return The full path where the file was stored.
+     */
     public String store(MultipartFile file, ReportType reportType) {
-        if (file.isEmpty()) throw new IllegalArgumentException("Failed to store empty file.");
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Failed to store empty file.");
+        }
         if (reportType == null || reportType.getName() == null || reportType.getName().isBlank()) {
-            throw new IllegalArgumentException("Cannot store file: ReportType is invalid.");
+            throw new IllegalArgumentException("Cannot store file: ReportType or its name is invalid.");
         }
         try {
             Path targetDirectory = this.rootLocation.resolve(reportType.getName());
             Files.createDirectories(targetDirectory);
             String uniqueFileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path destinationFile = targetDirectory.resolve(uniqueFileName).normalize().toAbsolutePath();
+
             try (InputStream inputStream = file.getInputStream()) {
                 Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
             return destinationFile.toString();
         } catch (IOException e) {
             throw new RuntimeException("Failed to store file.", e);
+        }
+    }
+
+    /**
+     * Loads a file from the file system as a resource.
+     * @param filePath The full path of the file to load.
+     * @return The file as a Spring Resource.
+     */
+    public Resource loadAsResource(String filePath) {
+        try {
+            Path file = Paths.get(filePath);
+            Resource resource = new UrlResource(file.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new RuntimeException("Could not read the file: " + filePath);
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Could not read the file: " + filePath, e);
         }
     }
 }
