@@ -1,0 +1,53 @@
+package RwTool.rwtool.services;
+
+import RwTool.rwtool.dto.ReportResponse;
+import RwTool.rwtool.entity.Report;
+import RwTool.rwtool.exception.ResourceNotFoundException;
+import RwTool.rwtool.repo.ReportRepository;
+import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class ReportService {
+
+    private final ReportRepository reportRepository;
+    private final FileStorageService fileStorageService;
+
+    public ReportService(ReportRepository reportRepository, FileStorageService fileStorageService) {
+        this.reportRepository = reportRepository;
+        this.fileStorageService = fileStorageService;
+    }
+
+    public List<ReportResponse> getAccessibleReports(Long userId) {
+        // In a real application, you would add logic here to filter reports
+        // based on the user's role and permissions.
+        // For now, we return all reports.
+        return reportRepository.findAll().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public Resource downloadReportFile(Long reportId, Long userId) {
+        // In a real application, you would first check if this userId has permission
+        // to download this specific reportId.
+
+        Report report = reportRepository.findById(reportId)
+            .orElseThrow(() -> new ResourceNotFoundException("Report not found with id: " + reportId));
+
+        // Log the download action here via an AuditService
+
+        return fileStorageService.loadAsResource(report.getFileStoragePath());
+    }
+
+    private ReportResponse convertToDto(Report report) {
+        return new ReportResponse(
+            report.getReportId(),
+            report.getFileName(),
+            report.getFileStoragePath(),
+            report.getGeneratedDate(),
+            report.getUploadedBy()
+        );
+    }
+}
