@@ -1,0 +1,49 @@
+package RwTool.rwtool.controller;
+
+import RwTool.rwtool.dto.ReportResponse;
+import RwTool.rwtool.services.ReportService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/reports")
+public class ReportController {
+
+    private final ReportService reportService;
+
+    public ReportController(ReportService reportService) {
+        this.reportService = reportService;
+    }
+
+    @GetMapping
+    public List<ReportResponse> getAccessibleReports(Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        return reportService.getAccessibleReports(userId);
+    }
+
+    @GetMapping("/{reportId}/download")
+    public ResponseEntity<Resource> downloadReport(@PathVariable Long reportId, Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        Resource resource = reportService.downloadReportFile(reportId, userId);
+
+        String contentType = "application/octet-stream";
+        try {
+            // Try to determine the file's actual content type
+            contentType = Files.probeContentType(resource.getFile().toPath());
+        } catch (IOException ex) {
+            // Log the error but proceed with the default generic type
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
+    }
+}
