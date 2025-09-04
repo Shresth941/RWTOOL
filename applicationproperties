@@ -1,0 +1,12 @@
+# PostgreSQL Database Connection
+spring.datasource.url=jdbc:postgresql://localhost:5412/rwtool_db
+spring.datasource.username=postgres
+spring.datasource.password=your_postgres_password # <-- IMPORTANT: CHANGE THIS
+
+# JPA/Hibernate Configuration
+# 'update' will automatically create/update your tables based on your Entity classes.
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# Local File Storage Configuration
+file.upload-dir=./local-file-storage
