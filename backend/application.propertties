@@ -1,0 +1,55 @@
+########################################
+# Application Info
+########################################
+spring.application.name=rwtool
+
+########################################
+# Database (PostgreSQL)
+########################################
+spring.datasource.url=jdbc:postgresql://localhost:5412/RWTOOL
+spring.datasource.username=postgres
+spring.datasource.password=12345
+
+# JPA / Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+########################################
+# File storage paths
+########################################
+# Directory where source system drops files (for ingest webhook)
+file.incoming-dir=C:/Users/2031127/rwtoolProject/incoming
+
+# Base directory where reports are stored after ingest or manual upload
+file-upload-dir=C:/Users/2031127/rwtoolProject/local-file-storage
+
+########################################
+# Spring Security
+########################################
+# We are using DB-backed auth (UserRepository + BCrypt).
+# No default user needed, but if you want a fallback in-memory admin, uncomment:
+# spring.security.user.name=admin
+# spring.security.user.password=adminPass123
+# spring.security.user.roles=WEALTH_ADMIN
+
+########################################
+# Multipart / file upload settings
+########################################
+# Max size of a single uploaded file
+spring.servlet.multipart.max-file-size=50MB
+# Max size of the entire request (multiple files)
+spring.servlet.multipart.max-request-size=100MB
+
+########################################
+# Swagger / API Docs (if you enable springdoc-openapi)
+########################################
+springdoc.api-docs.path=/v3/api-docs
+springdoc.swagger-ui.path=/swagger-ui.html
+
+########################################
+# Actuator (for monitoring/health)
+########################################
+management.endpoints.web.exposure.include=health,info,metrics,loggers
+management.endpoint.health.show-details=always
