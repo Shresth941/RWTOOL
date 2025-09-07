@@ -1,23 +1,21 @@
-package RwTool.rwtool.entity;
+package com.example.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_favorites",
-       uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "report_id"})},
-       indexes = {@Index(name = "idx_fav_user", columnList = "user_id")})
-@Getter
-@Setter
+@Table(name = "favorites", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"user_id", "report_id"})
+})
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Favorite {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "fav_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,7 +26,10 @@ public class Favorite {
     @JoinColumn(name = "report_id", nullable = false)
     private Report report;
 
-    // when the user bookmarked it
-    @Column(name = "bookmarked_at", nullable = false)
-    private LocalDateTime bookmarkedAt;
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
