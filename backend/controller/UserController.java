@@ -1,47 +1,50 @@
 package RwTool.rwtool.controller;
 
+import RwTool.rwtool.dto.ApiResponse;
 import RwTool.rwtool.dto.UserRequest;
 import RwTool.rwtool.dto.UserResponse;
 import RwTool.rwtool.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class UserController {
 
-    private final UserService service;
+    private final UserService userService;
 
-    public UserController(UserService service) { this.service = service; }
-
-    // Create user (signup) - admin or self-registration
     @PostMapping
-    public ResponseEntity<UserResponse> create(@RequestBody UserRequest req) {
-        return ResponseEntity.ok(service.createUser(req));
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody UserRequest req) {
+        UserResponse u = userService.createUser(req);
+        return ResponseEntity.status(201).body(ApiResponse.success("User created", u));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+        List<UserResponse> users = userService.getAllUsers();
+        return ResponseEntity.ok(ApiResponse.success("Users fetched", users));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> get(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getById(id));
+    public ResponseEntity<ApiResponse<UserResponse>> getById(@PathVariable Long id) {
+        UserResponse u = userService.getUserById(id);
+        return ResponseEntity.ok(ApiResponse.success("User fetched", u));
     }
 
-    @GetMapping("/role/{roleName}")
-    public ResponseEntity<List<UserResponse>> byRole(@PathVariable String roleName) {
-        return ResponseEntity.ok(service.getByRole(roleName));
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable Long id, @Valid @RequestBody UserRequest req) {
+        UserResponse updated = userService.updateUser(id, req);
+        return ResponseEntity.ok(ApiResponse.success("User updated", updated));
     }
 
-    @PostMapping("/{userId}/favorites/{reportId}")
-    public ResponseEntity<Void> toggleFavorite(@PathVariable Long userId, @PathVariable Long reportId) {
-        service.toggleFavorite(userId, reportId);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/{userId}/favorites")
-    public ResponseEntity<Set<Long>> getFavorites(@PathVariable Long userId) {
-        return ResponseEntity.ok(service.getFavoriteReportIds(userId));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok(ApiResponse.success("User deleted", null));
     }
 }
