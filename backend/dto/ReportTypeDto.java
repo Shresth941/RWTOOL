@@ -1,15 +1,17 @@
-package RwTool.rwtool.dto;
+package com.example.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ReportTypeDto {
-    private Long reportTypeId;
+    private Long id;
+
+    @NotBlank
     private String name;
-    private String sourcePath;
-    private String outputFolder;
+
+    private String description;
 }
