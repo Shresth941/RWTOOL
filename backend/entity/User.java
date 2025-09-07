@@ -1,62 +1,57 @@
-package RwTool.rwtool.entity;
+package com.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users",
-       indexes = {@Index(name = "idx_user_email", columnList = "email")})
-@Getter
-@Setter
+@Table(name = "users")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long userId;
+    private Long id;
 
-    @Column(name = "full_name", nullable = false)
-    private String fullName;
+    @Column(unique = true, nullable = false)
+    private String username;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(nullable = false)
+    private String password; // hashed
+
+    @Column(unique = true, nullable = false)
     private String email;
 
-    // store hashed password (BCrypt)
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    private String fullName;
+    private String mobile;
+    private String designation;
+    private String gender;
+    private boolean active = true;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
 
-    @Column(name = "last_login")
-    private LocalDateTime lastLogin;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    @Column(name = "is_active")
-    private boolean isActive = true;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
-    // If you prefer a many-to-many favorites without timestamp, use this.
-    // We keep an explicit Favorite entity to record timestamps (see Favorite.java).
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private Set<Favorite> favorites = new HashSet<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private Set<UserReport> userReports = new HashSet<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private Set<AuditLog> auditLogs = new HashSet<>();
-
-    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private Set<Notification> notifications = new HashSet<>();
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
