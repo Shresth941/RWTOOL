@@ -1,23 +1,18 @@
-package RwTool.rwtool.dto;
+package com.example.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserReportResponse {
     private Long id;
-    private String title;
-    private String content;
-    private String reportType;
-    private LocalDate reportDate;
-    private String category;
-    private Long userId;
-    private String userFullName;
-    private Long roleId;
-    private String roleName;
+    private UserResponse user;
+    private ReportResponse report;
+    private String status;
+    private String comments;
+    private LocalDateTime assignedAt;
+    private LocalDateTime lastAccessedAt;
 }
