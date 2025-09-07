@@ -1,21 +1,23 @@
-package RwTool.rwtool.dto;
+package com.example.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserResponse {
-    private Long userId;
-    private String fullName;
+    private Long id;
+    private String username;
     private String email;
-    private String roleName;
-    private LocalDateTime lastLogin;
-    private boolean isActive;
-    private Set<Long> favoriteReportIds;
+    private String fullName;
+    private String mobile;
+    private String designation;
+    private String gender;
+    private boolean active;
+    private Set<RoleDto> roles;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
