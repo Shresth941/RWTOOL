@@ -1,44 +1,41 @@
-package RwTool.rwtool.entity;
+package com.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_reports")
-@Getter
-@Setter
+@Table(name = "user_reports", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"user_id", "report_id"})
+})
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserReport {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String title;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
-
-    @Column(name = "report_type")
-    private String reportType;
-
-    @Column(name = "report_date")
-    private LocalDate reportDate;
-
-    private String category;
-
+    // linking user and report
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnore
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
-    @JsonIgnore
-    private Role role;
+    @JoinColumn(name = "report_id", nullable = false)
+    private Report report;
+
+    private String status; // PENDING / APPROVED / REJECTED, etc.
+    @Column(length = 2000)
+    private String comments;
+
+    private LocalDateTime assignedAt;
+    private LocalDateTime lastAccessedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (assignedAt == null) assignedAt = LocalDateTime.now();
+    }
 }
