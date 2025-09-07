@@ -1,14 +1,17 @@
-package RwTool.rwtool.dto;
+package com.example.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RoleDto {
-    private Long roleId;
-    private String name;
-    private String permissions;
+    private Long id;
+
+    @NotBlank
+    private String name; // e.g., ROLE_ADMIN, ROLE_OPS
+
+    private String description;
 }
