@@ -1,11 +1,28 @@
-package RwTool.rwtool.dto;
+package com.example.dto;
 
-import lombok.Data;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserRequest {
-    private String fullName;
+    @NotBlank
+    private String username;
+
+    @NotBlank
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    private String password;
+
+    @NotBlank
+    @Email
     private String email;
-    private String password;   // plain text → will be hashed in service
-    private String roleName;   // e.g. "WEALTH_ADMIN"
+
+    private String fullName;
+    private String mobile;
+    private String designation;
+    private String gender;
 }
