@@ -1,42 +1,38 @@
 package RwTool.rwtool.controller;
 
+import RwTool.rwtool.dto.ApiResponse;
 import RwTool.rwtool.dto.UserReportRequest;
 import RwTool.rwtool.dto.UserReportResponse;
 import RwTool.rwtool.service.UserReportService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/user-reports")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class UserReportController {
 
-    private final UserReportService service;
-
-    public UserReportController(UserReportService service) {
-        this.service = service;
-    }
+    private final UserReportService userReportService;
 
     @PostMapping
-    public ResponseEntity<UserReportResponse> create(@RequestBody UserReportRequest req) {
-        return ResponseEntity.ok(service.create(req));
+    public ResponseEntity<ApiResponse<UserReportResponse>> assignReport(@Valid @RequestBody UserReportRequest req) {
+        UserReportResponse resp = userReportService.assignReport(req);
+        return ResponseEntity.ok(ApiResponse.success("User report assigned", resp));
+    }
+
+    @GetMapping("/user/{userId}/recent")
+    public ResponseEntity<ApiResponse<List<UserReportResponse>>> recent(@PathVariable Long userId) {
+        List<UserReportResponse> list = userReportService.getRecentReportsForUser(userId);
+        return ResponseEntity.ok(ApiResponse.success("Recent reports", list));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserReportResponse>> byUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(service.getByUser(userId));
-    }
-
-    @GetMapping("/role/{roleName}")
-    public ResponseEntity<List<UserReportResponse>> byRole(@PathVariable String roleName) {
-        return ResponseEntity.ok(service.getByRole(roleName));
-    }
-
-    @GetMapping
-    public ResponseEntity<List<UserReportResponse>> search(@RequestParam(required = false) String type,
-                                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
-        return ResponseEntity.ok(service.findByCriteria(type, date));
+    public ResponseEntity<ApiResponse<List<UserReportResponse>>> forUser(@PathVariable Long userId) {
+        List<UserReportResponse> list = userReportService.getReportsForUser(userId);
+        return ResponseEntity.ok(ApiResponse.success("User reports", list));
     }
 }
