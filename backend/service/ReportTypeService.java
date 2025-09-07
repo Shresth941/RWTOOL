@@ -1,35 +1,28 @@
 package RwTool.rwtool.service;
 
+import RwTool.rwtool.dto.ReportTypeDto;
 import RwTool.rwtool.entity.ReportType;
-import RwTool.rwtool.exceptions.NotFoundException;
 import RwTool.rwtool.repo.ReportTypeRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ReportTypeService {
-    private final ReportTypeRepository repo;
 
-    public ReportTypeService(ReportTypeRepository repo) { this.repo = repo; }
+    private final ReportTypeRepository reportTypeRepository;
 
-    public ReportType create(String name, String sourcePath, String outputFolder) {
-        ReportType rt = new ReportType();
-        rt.setName(name);
-        rt.setSourcePath(sourcePath);
-        rt.setOutputFolder(outputFolder);
-        return repo.save(rt);
+    public ReportTypeDto createReportType(ReportTypeDto dto) {
+        ReportType t = ReportType.builder().name(dto.getName()).description(dto.getDescription()).build();
+        t = reportTypeRepository.save(t);
+        return ReportTypeDto.builder().id(t.getId()).name(t.getName()).description(t.getDescription()).build();
     }
 
-    public ReportType getById(Long id) {
-        return repo.findById(id).orElseThrow(() -> new NotFoundException("ReportType not found with id: " + id));
+    public List<ReportTypeDto> getAll() {
+        return reportTypeRepository.findAll().stream().map(t -> ReportTypeDto.builder()
+                .id(t.getId()).name(t.getName()).description(t.getDescription()).build()).collect(Collectors.toList());
     }
-
-    public ReportType getByName(String name) {
-        ReportType rt = repo.findByName(name);
-        if (rt == null) throw new NotFoundException("ReportType not found: " + name);
-        return rt;
-    }
-
-    public List<ReportType> getAll() { return repo.findAll(); }
 }
