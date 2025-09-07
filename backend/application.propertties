@@ -2,9 +2,11 @@
 # Application Info
 ########################################
 spring.application.name=rwtool
+server.port=8080
 
 ########################################
 # Database (PostgreSQL)
+# (Use your local DB settings — change if needed)
 ########################################
 spring.datasource.url=jdbc:postgresql://localhost:5412/RWTOOL
 spring.datasource.username=postgres
@@ -18,21 +20,15 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 
 ########################################
 # File storage paths
+# - file.incoming-dir : where source system places files (ingest reads from here)
+# - file.upload-dir   : where application stores uploaded/processed files (used by FileStorageService)
 ########################################
-# Directory where source system drops files (for ingest webhook)
 file.incoming-dir=C:/Users/2031127/rwtoolProject/incoming
+file.upload-dir=C:/Users/2031127/rwtoolProject/local-file-storage
 
-# Base directory where reports are stored after ingest or manual upload
-file-upload-dir=C:/Users/2031127/rwtoolProject/local-file-storage
-
-########################################
-# Spring Security
-########################################
-# We are using DB-backed auth (UserRepository + BCrypt).
-# No default user needed, but if you want a fallback in-memory admin, uncomment:
-# spring.security.user.name=admin
-# spring.security.user.password=adminPass123
-# spring.security.user.roles=WEALTH_ADMIN
+# NOTE:
+# - Ensure these directories exist on the machine running the app or the service will create them at runtime.
+# - Use absolute paths for Windows; for Linux, change to /opt/rwtool/uploads or similar.
 
 ########################################
 # Multipart / file upload settings
@@ -43,13 +39,39 @@ spring.servlet.multipart.max-file-size=50MB
 spring.servlet.multipart.max-request-size=100MB
 
 ########################################
-# Swagger / API Docs (if you enable springdoc-openapi)
+# Logging
+########################################
+logging.level.org.springframework=INFO
+logging.level.RwTool=DEBUG
+logging.level.RwTool.rwtool=DEBUG
+
+########################################
+# Springdoc (OpenAPI) - Swagger UI
+# (add dependency: org.springdoc:springdoc-openapi-starter-webmvc-ui)
 ########################################
 springdoc.api-docs.path=/v3/api-docs
 springdoc.swagger-ui.path=/swagger-ui.html
 
 ########################################
-# Actuator (for monitoring/health)
+# Jackson / date-time handling
 ########################################
-management.endpoints.web.exposure.include=health,info,metrics,loggers
-management.endpoint.health.show-details=always
+spring.jackson.time-zone=UTC
+spring.jackson.date-format=yyyy-MM-dd'T'HH:mm:ss
+
+########################################
+# Management / Actuator (optional)
+# Uncomment if you add the actuator dependency
+########################################
+# management.endpoints.web.exposure.include=health,info,metrics,loggers
+# management.endpoint.health.show-details=always
+
+########################################
+# Security notes
+# - We use DB-backed users; ensure an admin user exists (data.sql or ApplicationRunner)
+# - If you want a quick in-memory admin for dev, uncomment below (not recommended for prod):
+# spring.security.user.name=admin
+# spring.security.user.password=adminPass123
+# spring.security.user.roles=WEALTH_ADMIN
+########################################
+
+# End of file
