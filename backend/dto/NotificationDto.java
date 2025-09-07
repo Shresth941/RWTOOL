@@ -1,19 +1,17 @@
-package RwTool.rwtool.dto;
+package com.example.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class NotificationDto {
     private Long id;
+    private Long userId;
     private String title;
     private String message;
-    private String link;
-    private boolean read;
-    private LocalDateTime createdAt;
+    private boolean readFlag;
+    private LocalDateTime sentAt;
 }
