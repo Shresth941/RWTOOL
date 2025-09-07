@@ -1,38 +1,38 @@
-package RwTool.rwtool.entity;
+package com.example.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "audit_logs", indexes = {
-        @Index(name = "idx_audit_user", columnList = "user_id"),
-        @Index(name = "idx_audit_action", columnList = "action")
-})
-@Getter
-@Setter
+@Table(name = "audit_logs")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AuditLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "log_id")
-    private Long logId;
+    private Long id;
+
+    private String action; // e.g., CREATE_USER, UPLOAD_REPORT
+
+    private String entityName; // User, Report, etc.
+
+    private Long entityId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "performed_by_user_id")
+    private User performedBy;
 
-    // action e.g., "REPORT_DOWNLOADED", "REPORT_INGESTED", "USER_LOGIN"
-    @Column(name = "action", nullable = false)
-    private String action;
+    private LocalDateTime performedAt;
 
-    @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
-
-    // JSON string (ip, filename, details) - store as TEXT or jsonb if Postgres
-    @Column(name = "details", columnDefinition = "text")
+    @Column(length = 4000)
     private String details;
+
+    @PrePersist
+    protected void onCreate() {
+        performedAt = LocalDateTime.now();
+    }
 }
