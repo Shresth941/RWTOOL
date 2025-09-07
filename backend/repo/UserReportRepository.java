@@ -16,6 +16,7 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long> {
     List<UserReport> findByReportTypeAndReportDate(@Param("type") String type, @Param("date") LocalDate date);
 
     List<UserReport> findByReportType(String type);
+
     List<UserReport> findByReportDate(LocalDate date);
 
     @Query("SELECT ur FROM UserReport ur WHERE ur.user.userId = :userId")
