@@ -1,18 +1,18 @@
-package RwTool.rwtool.dto;
+package com.example.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AuditLogDto {
-    private Long logId;
-    private Long userId;
-    private String action;
-    private LocalDateTime timestamp;
+    private Long id;
+    private String action;        // e.g., CREATE_USER, UPLOAD_REPORT
+    private String entityName;    // e.g., User, Report
+    private Long entityId;
+    private Long performedByUserId;
+    private LocalDateTime performedAt;
     private String details;
 }
