@@ -1,26 +1,22 @@
-package RwTool.rwtool.entity;
+package com.example.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "roles",
-       indexes = {@Index(name = "idx_role_name", columnList = "name")})
-@Getter
-@Setter
+@Table(name = "roles")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
-    private Long roleId;
+    private Long id;
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
+    @Column(unique = true, nullable = false)
+    private String name; // e.g. ROLE_ADMIN, ROLE_OPS, ROLE_USER
 
-    // optional JSON/permissions string (postgres jsonb recommended if using Postgres)
-    @Column(name = "permissions", columnDefinition = "text")
-    private String permissions;
+    private String description;
 }
