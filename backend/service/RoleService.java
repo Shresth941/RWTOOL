@@ -1,38 +1,31 @@
 package RwTool.rwtool.service;
 
+import RwTool.rwtool.dto.RoleDto;
 import RwTool.rwtool.entity.Role;
-import RwTool.rwtool.exceptions.NotFoundException;
 import RwTool.rwtool.repo.RoleRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class RoleService {
-    private final RoleRepository repo;
 
-    public RoleService(RoleRepository repo) {
-        this.repo = repo;
+    private final RoleRepository roleRepository;
+
+    public RoleDto createRole(RoleDto dto) {
+        Role r = Role.builder().name(dto.getName()).description(dto.getDescription()).build();
+        r = roleRepository.save(r);
+        return RoleDto.builder().id(r.getId()).name(r.getName()).description(r.getDescription()).build();
     }
 
-    public Role createRole(String name, String permissions) {
-        Role r = new Role();
-        r.setName(name);
-        r.setPermissions(permissions);
-        return repo.save(r);
-    }
-
-    public Role getById(Long id) {
-        return repo.findById(id).orElseThrow(() -> new NotFoundException("Role not found with id: " + id));
-    }
-
-    public Role getByName(String name) {
-        Role r = repo.findByName(name);
-        if (r == null) throw new NotFoundException("Role not found: " + name);
-        return r;
-    }
-
-    public List<Role> getAll() {
-        return repo.findAll();
+    public List<RoleDto> getAllRoles() {
+        return roleRepository.findAll().stream().map(r -> RoleDto.builder()
+                .id(r.getId())
+                .name(r.getName())
+                .description(r.getDescription())
+                .build()).collect(Collectors.toList());
     }
 }
