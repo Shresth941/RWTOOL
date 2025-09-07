@@ -1,14 +1,23 @@
-package RwTool.rwtool.dto;
+package com.example.dto;
 
-import lombok.Data;
-
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ReportRequest {
-    private String name;
-    private String path;
-    private LocalDateTime generatedDate;
-    private String uploadedBy;
-    private Long reportTypeId;   // optional
+    @NotBlank
+    private String title;
+
+    private String description;
+
+    // file metadata (if client provides)
+    private String fileName;
+    private String fileType;
+
+    // reference IDs
+    private Long reportTypeId;
+    private Long createdByUserId;
 }
