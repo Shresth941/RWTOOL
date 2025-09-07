@@ -1,16 +1,19 @@
-package RwTool.rwtool.dto;
+package com.example.dto;
 
-import lombok.Data;
-
-import java.time.LocalDate;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserReportRequest {
-    private String title;
-    private String content;
-    private String reportType;
-    private LocalDate reportDate;
-    private String category;
+    @NotNull
     private Long userId;
-    private Long roleId;
+
+    @NotNull
+    private Long reportId;
+
+    private String status; // PENDING, APPROVED, etc.
+    private String comments;
 }
