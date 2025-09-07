@@ -1,46 +1,52 @@
 package RwTool.rwtool.controller;
 
-import RwTool.rwtool.dto.IngestRequest;
+import RwTool.rwtool.dto.ApiResponse;
 import RwTool.rwtool.service.IngestService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/ingest")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequiredArgsConstructor
 public class IngestController {
 
     private final IngestService ingestService;
 
-    public IngestController(IngestService ingestService) {
-        this.ingestService = ingestService;
+    /**
+     * Upload file + metadata.
+     * Accepts multipart file and metadata params (uniqueId, action, fileType, outputFolderPath).
+     */
+    @PostMapping("/upload")
+    public ResponseEntity<ApiResponse<String>> upload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "uniqueId", required = false) String uniqueId,
+            @RequestParam(value = "action", required = false) String action,
+            @RequestParam(value = "fileType", required = false) String fileType,
+            @RequestParam(value = "outputFolderPath", required = false) String outputFolderPath) {
+
+        try {
+            String storedPath = ingestService.storeAndCreateReportRecord(file, uniqueId, action, fileType, outputFolderPath);
+            return ResponseEntity.ok(ApiResponse.success("File uploaded", storedPath));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Upload failed: " + ex.getMessage()));
+        }
     }
 
     /**
-     * Source system calls this endpoint to notify RW Tool of a file event.
-     * Supports actions:
-     *  - "New"    → move file from incomingDir to uploadDir and create DB record.
-     *  - "Delete" → delete file and remove DB record.
-     *
-     * @param req JSON body with ingest details
-     * @return ResponseEntity with status message
+     * Manual trigger: move/process a file from source to destination.
+     * Admin-only (optionally protected by @PreAuthorize in security config).
      */
-    @PostMapping
-    public ResponseEntity<String> ingest(@RequestBody IngestRequest req) {
-        if (req.getAction() == null || req.getInputFileName() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid request: 'action' and 'inputFileName' are required");
-        }
-
+    @PostMapping("/process")
+    public ResponseEntity<ApiResponse<String>> process(@RequestParam String sourcePath, @RequestParam String destinationPath) {
         try {
-            ingestService.process(req);
-            return ResponseEntity.ok("Ingest action processed successfully: " + req.getAction());
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request: " + ex.getMessage());
+            ingestService.processFile(sourcePath, destinationPath);
+            return ResponseEntity.ok(ApiResponse.success("Processing triggered", null));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error while processing ingest: " + ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error(ex.getMessage()));
         }
     }
 }
