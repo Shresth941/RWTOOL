@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+    // note: this mirrors the repository method in your upload
     List<Notification> findByRecipientIdOrderByCreatedAtDesc(Long recipientId);
 }
