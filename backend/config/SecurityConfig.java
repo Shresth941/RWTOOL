@@ -1,105 +1,40 @@
-// package RwTool.rwtool.config;
-
-// import RwTool.rwtool.service.CustomUserDetailsService;
-// import org.springframework.context.annotation.Bean;
-// import org.springframework.context.annotation.Configuration;
-// import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-// import org.springframework.security.config.Customizer;
-// import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-// import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-// import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-// import org.springframework.security.crypto.password.PasswordEncoder;
-// import org.springframework.security.web.SecurityFilterChain;
-
-// @Configuration
-// @EnableMethodSecurity // enables @PreAuthorize, @Secured etc.
-// public class SecurityConfig {
-
-//     private final CustomUserDetailsService userDetailsService;
-
-//     public SecurityConfig(CustomUserDetailsService userDetailsService) {
-//         this.userDetailsService = userDetailsService;
-//     }
-
-//     @Bean
-//     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-//         // We permit the ingest webhook to be unauthenticated. Everything else requires authentication.
-//         http
-//             .csrf(csrf -> csrf.disable()) // API only; if you enable stateful sessions, adapt this
-//             .authorizeHttpRequests(auth -> auth
-//                     // permit health, swagger, and ingest webhook endpoints (adjust as needed)
-//                     .requestMatchers("/api/ingest", "/actuator/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-//                     .anyRequest().authenticated()
-//             )
-//             .httpBasic(Customizer.withDefaults()); // HTTP Basic authentication
-
-//         // Use DaoAuthenticationProvider with our UserDetailsService + password encoder
-//         http.authenticationProvider(daoAuthenticationProvider());
-
-//         return http.build();
-//     }
-
-//     @Bean
-//     public DaoAuthenticationProvider daoAuthenticationProvider() {
-//         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-//         authProvider.setUserDetailsService(userDetailsService);
-//         authProvider.setPasswordEncoder(passwordEncoder());
-//         return authProvider;
-//     }
-
-//     @Bean
-//     public PasswordEncoder passwordEncoder() {
-//         return new BCryptPasswordEncoder();
-//     }
-// }
 package RwTool.rwtool.config;
 
-import RwTool.rwtool.service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+@RequiredArgsConstructor
 @Configuration
-@EnableMethodSecurity // enables @PreAuthorize, @Secured, etc.
+@EnableMethodSecurity(prePostEnabled = true) // enable @PreAuthorize
 public class SecurityConfig {
 
-    private final CustomUserDetailsService userDetailsService;
-
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
+    // If you have a custom UserDetailsService bean, Spring will auto-wire it.
+    // Example: private final CustomUserDetailsService userDetailsService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // 🚨 TEMPORARY: Permit all requests (disable security)
-        // Use this only for testing backend with Postman.
-        // IMPORTANT: Revert this before production / final submission.
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+            .csrf().disable()
+            .cors().and()
+            .authorizeHttpRequests(authorize -> authorize
+                // allow swagger and openapi
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                // optionally allow health endpoints if you added actuator
+                .requestMatchers("/actuator/**").permitAll()
+                // allow unauthenticated ingest upload if you want source system to upload without auth:
+                // .requestMatchers("/api/ingest/upload").permitAll()
+                .anyRequest().authenticated()
             )
-            .httpBasic(Customizer.withDefaults()); // won't matter, since all endpoints are open
-
-        // keep authentication provider configured (harmless, unused in permitAll mode)
-        http.authenticationProvider(daoAuthenticationProvider());
+            .httpBasic(); // Basic auth for simplicity
 
         return http.build();
-    }
-
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
     }
 
     @Bean
@@ -107,5 +42,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-
-
