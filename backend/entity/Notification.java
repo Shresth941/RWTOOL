@@ -1,45 +1,37 @@
-package RwTool.rwtool.entity;
+package com.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications", indexes = {
-        @Index(name = "idx_notification_user", columnList = "recipient_id"),
-        @Index(name = "idx_notification_created", columnList = "created_at")
-})
-@Getter
-@Setter
+@Table(name = "notifications")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "notification_id")
     private Long id;
 
+    // which user should receive the notification
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipient_id", nullable = false)
-    @JsonIgnore
-    private User recipient;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "message", nullable = false, columnDefinition = "text")
+    @Column(length = 2000)
     private String message;
 
-    // optional link (e.g., path to report or UI route)
-    @Column(name = "link", length = 2000)
-    private String link;
+    private boolean readFlag = false; // renamed to avoid conflict with SQL keyword
 
-    @Column(name = "is_read", nullable = false)
-    private boolean read = false;
+    private LocalDateTime sentAt;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @PrePersist
+    protected void onCreate() {
+        sentAt = LocalDateTime.now();
+    }
 }
