@@ -1,7 +1,7 @@
-package RwTool.rwtool.exceptions;
+package RwTool.rwtool.exception;
 
 public class BadRequestException extends RuntimeException {
-    public BadRequestException(String message) {
-        super(message);
-    }
+    public BadRequestException() { super(); }
+    public BadRequestException(String message) { super(message); }
+    public BadRequestException(String message, Throwable cause) { super(message, cause); }
 }
