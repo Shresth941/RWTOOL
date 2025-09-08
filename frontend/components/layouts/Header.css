@@ -1,0 +1,45 @@
+/* components/layout/Header/Header.css */
+.app-header {
+  height: 72px;
+  background: #fff;
+  border-bottom: 1px solid #e6e9ee;
+  padding: 0.75rem 1rem;
+  z-index: 50;
+}
+
+.brand-logo {
+  height: 44px;
+  width: auto;
+}
+
+.brand-text h4 {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #061243;
+}
+
+.brand-text small {
+  font-size: 0.75rem;
+}
+
+.sidebar-toggle {
+  font-size: 1.25rem;
+  color: #061243;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #2f66b7;
+  color: #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:600;
+}
+.user-name {
+  font-weight:600;
+  color:#222;
+}
+.nav-link { margin: 0 .7rem; color: #2f66b7; }
