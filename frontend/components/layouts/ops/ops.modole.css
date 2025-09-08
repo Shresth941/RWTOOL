@@ -1,0 +1,3 @@
+/* components/ops/OpsHeader.module.css */
+.ops-header { background: #fff; border-bottom: 1px solid #e9ecef; }
+.ops-header .search-box input { width: 260px; }
