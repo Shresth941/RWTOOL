@@ -1,0 +1,42 @@
+/* components/layout/Sidebar/Sidebar.css */
+.app-sidebar {
+  width: 220px;
+  background: #020b43;
+  color: #e6eefc;
+  min-height: 100vh;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+.app-sidebar .logo img {
+  height: 36px;
+}
+.app-sidebar .brand {
+  color: #fff;
+  font-weight:700;
+  font-size: 0.95rem;
+}
+.app-sidebar .nav-item {
+  color: #c9d6ff;
+  padding: 10px 12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  border-radius:6px;
+  margin:6px 6px;
+}
+.app-sidebar .nav-item svg { font-size: 18px; }
+.app-sidebar .nav-item.active,
+.app-sidebar .nav-item:hover {
+  background: #143066;
+  color: #fff;
+}
+.app-sidebar .sidebar-footer {
+  margin-top:auto;
+  padding:12px;
+  border-top:1px solid rgba(255,255,255,0.04);
+  text-align:center;
+  font-size:0.8rem;
+}
+.app-sidebar.collapsed { width: 64px; }
