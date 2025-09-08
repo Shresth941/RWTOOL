@@ -1,0 +1,165 @@
+/* src/App.css - global styling tuned to your project's palette */
+
+/* Root color variables (used across components) */
+:root{
+  --primary-navy: #020b43;
+  --accent-blue: #2F9BD6;
+  --muted: #6b6b6b;
+  --card-bg: #ffffff;
+  --surface: #f8f9fa;
+  --success: #7ED957;
+  --danger: #e55353;
+  --radius: 10px;
+  --max-width: 1200px;
+}
+
+/* Generic page layout */
+html,body,#root {
+  height:100%;
+  margin:0;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  background: var(--surface);
+  color: #222;
+}
+
+.app-root{
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+
+/* Header placeholder spacing so fixed headers don't overlap content (if header fixed) */
+.app-main{
+  flex:1;
+  width:100%;
+  max-width:var(--max-width);
+  margin: 20px auto;
+  padding: 0 16px 40px;
+  box-sizing:border-box;
+}
+
+/* ===== Header (used by Header.css but keep base here) ===== */
+.header {
+  background: var(--card-bg);
+  border-bottom: 1px solid #e9ecef;
+  padding: 16px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.logo-image {
+  height:48px;
+}
+
+/* ===== Footer ===== */
+footer {
+  background: var(--primary-navy);
+  color: #fff;
+  padding: 14px 20px;
+  text-align:center;
+  font-size: 0.9rem;
+}
+
+/* ===== Cards & containers ===== */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 16px rgba(18, 30, 68, 0.06);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+/* Small reusable headers */
+.page-title {
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.page-title h1, .page-title h2 {
+  margin:0;
+  color: var(--primary-navy);
+  font-weight:700;
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent-blue), #1f7fb6);
+  border: none;
+  box-shadow: 0 6px 12px rgba(47,155,214,0.18);
+  border-radius: 8px;
+  padding: 8px 14px;
+}
+
+.btn-outline-primary {
+  color: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+/* Table small improvements */
+.table thead th {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Sidebar layout helper (if using a sidebar) */
+.app-with-sidebar {
+  display: flex;
+  gap: 20px;
+}
+
+.sidebar {
+  width: 240px;
+  background: var(--primary-navy);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 12px;
+  min-height: 380px;
+}
+
+/* Search box */
+.search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ef;
+  background: #fff;
+}
+
+/* small helper styles used by multiple components */
+.kicker {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 992px) {
+  .app-main {
+    padding: 0 12px;
+  }
+  .sidebar {
+    display: none;
+  }
+}
+
+/* Toast container override */
+.toast-container {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 2000;
+}
+
+/* Nice file upload preview */
+.file-preview {
+  border: 1px dashed #dee2e6;
+  padding: 8px;
+  border-radius: 8px;
+  background: #fafafa;
+  font-size: 0.9rem;
+}

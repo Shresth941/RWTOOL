@@ -1,0 +1,93 @@
+/* src/index.css - global styles and theme variables */
+
+/* Root color palette (matches your site's blues/white) */
+:root{
+    --primary:#2F9BD6;
+    --primary-dark:#1f6fa0;
+    --muted:#6b6b6b;
+    --bg:#ffffff;
+    --card-bg:#ffffff;
+    --hero-overlay: rgba(0,0,0,0.35);
+    --accent:#7ED957;
+    --sidebar-bg:#020b43;
+  }
+  
+  /* Global page */
+  html,body,#root {
+    height:100%;
+    margin:0;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:var(--bg);
+    color:#222;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  
+  /* Utility containers */
+  .container {
+    max-width:1140px;
+  }
+  
+  /* Header / footer spacing helpers */
+  .header, .footer {
+    background:var(--card-bg);
+    border-bottom:1px solid #e9ecef;
+  }
+  
+  /* Hero placeholders */
+  .home-hero, .about-hero, .faq-hero, .contact-hero {
+    width:100%;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-size:cover;
+    position:relative;
+    height:380px;
+    display:flex;
+    align-items:center;
+    color:#fff;
+  }
+  .home-hero::after, .about-hero::after, .faq-hero::after, .contact-hero::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    background:var(--hero-overlay);
+  }
+  
+  /* Cards & features */
+  .card {
+    background:var(--card-bg);
+    border-radius:8px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.04);
+  }
+  
+  /* Small responsive tweaks */
+  @media (max-width:768px){
+    .home-hero, .about-hero, .faq-hero, .contact-hero { height:260px; }
+    .display-5 { font-size:2rem; }
+  }
+  
+  /* Simple accessibility focus style */
+  :focus { outline: 3px solid rgba(47,155,214,0.25); outline-offset:2px; }
+  
+  /* Buttons using brand color */
+  .btn-primary {
+    background:var(--primary);
+    border-color:var(--primary);
+  }
+  .btn-primary:hover {
+    background:var(--primary-dark);
+    border-color:var(--primary-dark);
+  }
+  
+  /* Footer small */
+  .footer {
+    padding: 1rem 0;
+    text-align:center;
+    color:#fff;
+    background:var(--sidebar-bg);
+  }
+  
+  /* FAQ / About / Contact custom minor tweaks (optional) */
+  .faq-card { cursor:pointer; }
+  .faq-question { font-weight:600; }
+  
